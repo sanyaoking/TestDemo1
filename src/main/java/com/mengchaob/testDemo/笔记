@@ -1,0 +1,57 @@
+在项目多个中试图整合时，每种试图解析器最后自己都设定一下，不要使用springboot的默认配置，因为可能会出现问题
+1. springboot并有jsp的启动依赖，所以需要手动添加jsp的依赖
+<dependency>
+    <groupId>org.apache.tomcat.embed</groupId>
+    <artifactId>tomcat-embed-jasper</artifactId>
+    <scope>provided</scope>
+</dependency>
+<dependency>
+    <groupId>javax.servlet</groupId>
+    <artifactId>jstl</artifactId>
+</dependency>
+2.由于springboot官方不推荐jsp，所以没有内置jsp解析器，需要我们自己创建解析器
+spring.mvc.view.prefix:/WEB-INF/jsp/
+spring.mvc.view.suffix:.jsp
+spring.mvc.view.order:2
+--上面是springboot的application.properties中增加的变量
+@Configuration
+public class ConfigView {
+    @Value("${spring.mvc.view.prefix}")
+    private String prefix;
+    @Value("${spring.mvc.view.suffix}")
+    private String suffix;
+    @Value("${spring.mvc.view.order}")
+    private int order;
+    @Bean
+    InternalResourceViewResolver getjspViewResolver(){
+        final  InternalResourceViewResolver irvr = new InternalResourceViewResolver();
+        irvr.setPrefix(prefix);
+        irvr.setSuffix(suffix);
+        irvr.setOrder(order);
+        return irvr;
+    }
+}
+3.jsp标签学习的网站http://www.runoob.com/jsp/jsp-syntax.html,freemarker的学习网站http://freemarker.foofun.cn/
+
+4.freemarker默认的在springboot中有默认配置，前缀后缀默认配置如下
+#前缀为空所以取默认/resources/templates的目录，当然如果修改默认配置后，也是可以成为其他目录的,如果将其改为template2的话那么目录为/resources/templates/template2
+spring.freemarker.prefix=
+#后缀默认为.ftl
+spring.freemarker.suffix=.ftl
+
+3.springboot项目中同时存在jsp、freemark、thymleaf时，应该注意我们需要通过试图解析其中的order属性进行匹配优先级设定，最重要的时，
+  如果多个解析器都存在文件名相同的的文件first.jsp、first.ftl、first.html，而一个controller方法返回了字符串”first”那么只会匹配优先级搞得解析器，优先级低的不会被解析
+
+4.使用freemark解析器
+ @Bean
+    FreeMarkerViewResolver getjspViewResolver(){
+        final FreeMarkerViewResolver fmvr = new FreeMarkerViewResolver();
+        fmvr.setPrefix("");
+        fmvr.setSuffix(".ftl");
+        fmvr.setOrder(3);
+        //修正ftl页面中文乱码问题
+        fmvr.setContentType("text/html;charset=UTF-8");
+        return fmvr;
+    }
+
+
