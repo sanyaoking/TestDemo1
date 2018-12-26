@@ -53,5 +53,16 @@ spring.freemarker.suffix=.ftl
         fmvr.setContentType("text/html;charset=UTF-8");
         return fmvr;
     }
-
-
+5.在配置试图前缀时（即试图的prefix参数），一定要注意字符串最后是否需要增加“/”
+6.thymleaf试图配置
+@Configuration
+  public class ConfigThymleafView {
+      @Bean
+      ThymeleafViewResolver getthymLeafViewResolver(SpringTemplateEngine stle){
+          final ThymeleafViewResolver trvr = new ThymeleafViewResolver();
+          trvr.setOrder(0);
+          trvr.setTemplateEngine(stle);
+          return trvr;
+      }
+  }
+试图整合到此结束，上面就是我们常用的试图解析配置
